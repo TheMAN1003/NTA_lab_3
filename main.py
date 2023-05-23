@@ -9,6 +9,7 @@ def extended_gcd(a, b):
         (d, x, y) = extended_gcd(b, a % b)
         return d, y, x - int(a / b) * y
 
+
 def powMod(x, pow, mod):
     C = 1
     if pow == 0:
@@ -20,8 +21,11 @@ def powMod(x, pow, mod):
         if i != len(powB) - 1:
             C = (C * C) % mod
     return C
+
+
 def nSize(n):
     return 3.38*exp(0.5*sqrt(log2(n)*log2(log2(n))))
+
 
 def buildBase(n):
     nprime = 0
@@ -33,6 +37,7 @@ def buildBase(n):
                 primelist.append(line.rstrip())
                 nprime += 1
     return primelist
+
 
 def checkSmooth(alpha, base, mod, n):
     listk = []
@@ -49,6 +54,7 @@ def checkSmooth(alpha, base, mod, n):
         matrix.append(dividers.values())
     return matrix, listk
 
+
 def pivot(h, matrix):
     max = 0
     counter = 0
@@ -57,6 +63,7 @@ def pivot(h, matrix):
             max = abs(matrix[i][h])
             counter = i
     return counter
+
 
 def triangle(matrix, vector, mod):
     vector = np.array(vector)
@@ -77,15 +84,33 @@ def triangle(matrix, vector, mod):
             matrix[i][k] = 0
     return matrix, vector
 
-# def Gauss(matrix, vector, mod):
-#     solution = []
-#     for i in reversed(range(len(matrix))):
 
+def reverse_steps(matrix, vector, mod):
+    solution = np.zeros_like(vector)
+    for i in reversed(range(len(matrix))):
+        number = 0
+        for j in reversed(range(len(matrix))):
+            number += solution[j]
+        solution[i] = extended_gcd(vector[i] - number, matrix[i][i])[1] % mod
+    return solution
+
+
+def Gauss(matrix, vector, mod):
+    matrix, vector = triangle(matrix, vector, mod)
+    result = reverse_steps(matrix, vector, mod)
+    return result
+
+
+def findLog(l, divlist, loglist, mod):
+    sum = 0
+    for i in range(loglist):
+        sum += (divlist[i] * loglist[i] - l) % mod
+    return sum
 
 matrix = [[5, 7, 11], [12, 9, 1], [4, 13, 17]]
 vector = [4, 5, 1]
 
-print(triangle(matrix, vector, 37))
+print(Gauss(matrix, vector, 37))
 
 
 a = 1
