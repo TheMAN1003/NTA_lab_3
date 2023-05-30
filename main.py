@@ -1,14 +1,7 @@
 from sympy.ntheory import factorint
 from math import exp, log2, sqrt
 import numpy as np
-
-def extended_gcd(a, b):
-    if b == 0:
-        return a, 1, 0
-    else:
-        (d, x, y) = extended_gcd(b, a % b)
-        return d, y, x - int(a / b) * y
-
+import Gauss as gs
 
 def powMod(x, pow, mod):
     C = 1
@@ -55,66 +48,49 @@ def checkSmooth(alpha, base, mod, n):
     return matrix, listk
 
 
-def pivot(h, matrix):
-    max = 0
-    counter = 0
-    for i in range(h, len(matrix)):
-        if abs(matrix[i][h]) > max:
-            max = abs(matrix[i][h])
-            counter = i
-    return counter
-
-
-def triangle(matrix, vector, mod):
-    vector = np.array(vector)
-    matrix = np.array(matrix)
-    minlen = min(len(matrix), len(matrix[0]))
-    for k in range(minlen):
-        i_max = pivot(k, matrix)
-        if matrix[i_max][k] == 0:
-            print("Mistake in matrix")
-            return
-        matrix[[k, i_max]] = matrix[[i_max, k]]
-        vector[k], vector[i_max] = vector[i_max], vector[k]
-        for i in range(k+1, len(matrix)):
-            f = (matrix[i][k] * extended_gcd(matrix[k][k], mod)[1]) % mod
-            for j in range(k+1, len(matrix[0])):
-                matrix[i][j] = (matrix[i][j] - matrix[k][j]*f) % mod
-                vector[i] = (vector[i] - vector[k]*f) % mod
-            matrix[i][k] = 0
-    return matrix, vector
-
-
-def reverse_steps(matrix, vector, mod):
-    solution = np.zeros_like(vector)
-    for i in reversed(range(len(matrix))):
-        number = 0
-        for j in reversed(range(len(matrix))):
-            number += solution[j]
-        solution[i] = extended_gcd(vector[i] - number, matrix[i][i])[1] % mod
-    return solution
-
-
-def Gauss(matrix, vector, mod):
-    matrix, vector = triangle(matrix, vector, mod)
-    result = reverse_steps(matrix, vector, mod)
-    return result
-
-
 def findLog(l, divlist, loglist, mod):
     sum = 0
     for i in range(loglist):
         sum += (divlist[i] * loglist[i] - l) % mod
     return sum
 
-matrix = [[5, 7, 11], [12, 9, 1], [4, 13, 17]]
-vector = [4, 5, 1]
+# matrix = [[5, 7, 11], [12, 9, 1], [4, 13, 17]]
+# vector = [4, 5, 1]
 
-print(Gauss(matrix, vector, 37))
 
+# print(gs.Gauss(matrix, vector, 36))
 
 a = 1
 b = 1
 mod = 10
 n = mod - 1
+# x1  x2 x3 x4
+# 1   1  0  0  13
+# 0   1  1  0  19
+# 1   0  1  0  22
+# 1   0  0  1  20
+
+
+m1 = [[1,  1, 0,  0],
+[0,  0, 1,  0],
+[0,  0, 1, 35],
+[0,  0, 2,  0],
+[0,  0, 0,  1]]
+
+matrix = np.matrix([[1, 1, 0, 0],
+                    [0, 1, 1, 0],
+                    [1, 0, 0, 1],
+                    [1, 0, 1, 0],
+                    [0, 1, 0, 0]])
+
+matrix[:, [1, 2]] = matrix[:, [2, 1]]
+
+vector = np.array([13, 19, 20, 22, 23])
+#
+# (vector[0], vector[1]) = (vector[1], vector[0])
+# print(vector)
+print(gs.triangle(matrix, vector, 36))
+
+print(gs.extended_gcd(35,36))
+
 
