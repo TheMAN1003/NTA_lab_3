@@ -4,6 +4,7 @@ import numpy as np
 import Gauss as gs
 import random
 import time
+import parallel as par
 
 
 def powMod(x, pow, mod):
@@ -76,7 +77,7 @@ def findSystem(alpha, base, n):
 
     system = []
     B = []
-    c = int(100*log10(n)) + 1
+    c = int(200*log10(n)) + 1
     end = c + len(base)
     i = 0
 
@@ -87,7 +88,7 @@ def findSystem(alpha, base, n):
                 p_i = factorint(powMod(alpha, k, n))
 
                 vector = [0]*len(base)
-                print(i, len(system), end)
+
                 push = 1
                 for p, power in p_i.items():
                     exist, indexP = binarySearch(p, base)
@@ -100,7 +101,7 @@ def findSystem(alpha, base, n):
                     B.append(k)
                     system.append(vector)
                 i += 1
-
+        print("Try")
         res, done = gs.Gauss(system, B, n - 1)
 
         if done == -1:
@@ -139,42 +140,33 @@ def indexCalculus(alpha, beta, n):
     print("FOUND SMALL LOGS")
     return findLogBeta(alpha, beta, base, n, smallLogs)
 
+if __name__ == '__main__':
 
-matrix = [[1,2,3],
-          [2,5,6],
-          [7,8,9]]
-gs.swap_columns(matrix, 0, 2)
-print(matrix)
+    print("Program can solve: a^x = b mod p. Please enter next parameters:")
+    print("Enter a:")
+    a = int(input())
+    print("Enter b:")
+    b = int(input())
+    print("Enter p:")
+    p = int(input())
 
-# a = 1960530433
-# b = 650546347
-# p = 6272053633
-a = 1141696797029
-b = 1186992589464
-p = 1275397275767
+    start_time = time.time()
 
-#
-# print("Program can solve: a^x = b mod p. Please enter next parameters:")
-# print("Enter a:")
-# a = int(input())
-# print("Enter b:")
-# b = int(input())
-# print("Enter p:")
-# p = int(input())
+    eta = int(indexCalculus(a, b, p))
 
-start_time = time.time()
-eta = int(indexCalculus(a, b, p))
+    end_time = time.time()
 
-end_time = time.time()
+    print("x =", eta)
 
-print("x =", eta)
+    if powMod(a, eta, p) == b:
+        print("Correct")
+    else:
+        print("Inncorrect")
 
-if powMod(a, eta, p) == b:
-    print("Correct")
-else:
-    print("Inncorrect")
+    execution_time = end_time - start_time
+    print("Час виконання: ", execution_time, "секунд")
 
-execution_time = end_time - start_time
-print("Час виконання: ", execution_time, "секунд")
+
+
 
 

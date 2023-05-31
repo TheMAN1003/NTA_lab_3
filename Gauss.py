@@ -117,3 +117,5 @@ def Gauss(matrix1, vector1, mod):
         res[order[i]] = midResult[i]
 
     return res, 1
+
+
