@@ -4,8 +4,7 @@ import numpy as np
 import Gauss as gs
 import random
 import time
-import parallel as par
-
+import multiprocessing
 
 def powMod(x, pow, mod):
     C = 1
@@ -73,35 +72,62 @@ def dotMat(matrix, vector, mod):
         result.append(row_result)
     return np.array(result)
 
+
+def findVector(alpha, k ,n , base):
+    p_i = factorint(powMod(alpha, k, n))
+
+    vector = [0] * len(base)
+    push = 1
+    for p, power in p_i.items():
+        exist, indexP = binarySearch(p, base)
+        if exist == 1:
+            vector[indexP] = power
+        else:
+            push = 0
+            return vector, -1
+    if push == 1:
+        return vector, k
+
 def findSystem(alpha, base, n):
 
     system = []
     B = []
     c = int(200*log10(n)) + 1
     end = c + len(base)
+    endpar = c + len(base)
     i = 0
-
+    numproc = 10
+    pool = multiprocessing.Pool(processes=numproc)
     while(True):
-        while(len(system) <= end):
-                k = random.randint(0, n-1)
 
-                p_i = factorint(powMod(alpha, k, n))
+        tasks = []
+        start_time = time.time()
 
-                vector = [0]*len(base)
 
-                push = 1
-                for p, power in p_i.items():
-                    exist, indexP = binarySearch(p, base)
-                    if exist == 1:
-                        vector[indexP] = power
-                    else:
-                        push = 0
-                        break
-                if push == 1:
-                    B.append(k)
-                    system.append(vector)
+        while len(system) <= end:
+            tasks = []
+            i = 0
+            while i < endpar:
+                k = random.randint(0, n - 1)
+                tasks.append(pool.apply_async(findVector, (alpha, k, n, base)))
                 i += 1
-        print("Try")
+
+
+            for task in tasks:
+                tmp = task.get()
+                if tmp is not None:
+                    if tmp[1] != -1:
+                        system.append(tmp[0])
+                        B.append(tmp[1])
+
+        end_time = time.time()
+
+        execution_time = end_time - start_time
+        print("Час виконання: ", execution_time, "секунд")
+        print("syssize", len(system))
+
+        #pool.close()
+
         res, done = gs.Gauss(system, B, n - 1)
 
         if done == -1:
@@ -133,38 +159,12 @@ def indexCalculus(alpha, beta, n):
     print("BUILDED BASE")
     smallLogs = findSystem(alpha, base, n)
     for i in range(len(smallLogs)):
-        if powMod(a, int(smallLogs[i]), p) != base[i]:
+        if powMod(alpha, int(smallLogs[i]), n) != base[i]:
             print(smallLogs[i],int(smallLogs[i]))
             print("PROBLEM WITH SMALL LOGS")
             return -1
     print("FOUND SMALL LOGS")
     return findLogBeta(alpha, beta, base, n, smallLogs)
-
-if __name__ == '__main__':
-
-    print("Program can solve: a^x = b mod p. Please enter next parameters:")
-    print("Enter a:")
-    a = int(input())
-    print("Enter b:")
-    b = int(input())
-    print("Enter p:")
-    p = int(input())
-
-    start_time = time.time()
-
-    eta = int(indexCalculus(a, b, p))
-
-    end_time = time.time()
-
-    print("x =", eta)
-
-    if powMod(a, eta, p) == b:
-        print("Correct")
-    else:
-        print("Inncorrect")
-
-    execution_time = end_time - start_time
-    print("Час виконання: ", execution_time, "секунд")
 
 
 
